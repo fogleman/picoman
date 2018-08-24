@@ -6,7 +6,7 @@ import (
 	. "github.com/fogleman/picoman"
 )
 
-func main() {
+func Level4() *Model {
 	g := NewGrid(5, 4)
 	g.AddWall(Point{2, 0}, S)
 	g.AddWall(Point{2, 1}, E)
@@ -27,6 +27,49 @@ func main() {
 	m.AddAgent(NewStationaryAgent(Point{3, 2}, N))
 	m.AddAgent(NewStationaryAgent(Point{0, 3}, E))
 
+	return m
+}
+
+func Level5() *Model {
+	g := NewGridFromDescription([]string{
+		"o o o o",
+		"  |    ",
+		"o o-o-o",
+		"      |",
+		"o-o o-o",
+		"|   | |",
+		"o-o-o-o",
+	})
+
+	m := NewModel(g, Point{2, 3}, Point{1, 0})
+	m.AddAgent(NewStationaryAgent(Point{2, 1}, E))
+	m.AddAgent(NewRockAgent(Point{1, 2}))
+	return m
+}
+
+func Level6() *Model {
+	g := NewGridFromDescription([]string{
+		"o o o o",
+		"  |   |",
+		"o-o-o-o",
+		"|     |",
+		"o-o-o o",
+		"|   | |",
+		"o-o-o o",
+	})
+
+	m := NewModel(g, Point{2, 3}, Point{3, 0})
+	m.AddAgent(NewStationaryAgent(Point{1, 0}, S))
+	m.AddAgent(NewStationaryAgent(Point{1, 1}, W))
+	m.AddAgent(NewStationaryAgent(Point{3, 1}, W))
+	m.AddAgent(NewStationaryAgent(Point{3, 3}, S))
+	m.AddAgent(NewRockAgent(Point{0, 2}))
+	m.AddAgent(NewRockAgent(Point{2, 2}))
+	return m
+}
+
+func main() {
+	m := Level6()
 	fmt.Println(m)
 	Search(m)
 }

@@ -10,6 +10,7 @@ const (
 var (
 	ZobristPlayer [MaxCells]uint64
 	ZobristAgent  [MaxAgents][MaxCells][4]uint64
+	ZobristRock   uint64
 )
 
 func init() {
@@ -24,4 +25,6 @@ func init() {
 			}
 		}
 	}
+
+	ZobristRock = rand.Uint64()
 }

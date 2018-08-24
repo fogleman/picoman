@@ -20,6 +20,25 @@ func NewGrid(w, h int) *Grid {
 	return &Grid{w, h, walls, nil, nil}
 }
 
+func NewGridFromDescription(desc []string) *Grid {
+	w := len(desc[0])/2 + 1
+	h := len(desc)/2 + 1
+	g := NewGrid(w, h)
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			p := Point{x, y}
+			if x < w-1 && desc[y*2][x*2+1] != '-' {
+				g.AddWall(p, E)
+			}
+			if y < h-1 && desc[y*2+1][x*2] != '|' {
+				g.AddWall(p, S)
+			}
+		}
+	}
+	g.Finalize()
+	return g
+}
+
 func (g *Grid) Finalize() {
 	g.floydWarshall()
 }
@@ -51,10 +70,38 @@ func (g *Grid) CanMove(p Point, d Direction) bool {
 	return g.Walls[i]&int(d) == 0
 }
 
-func (g *Grid) Distance(src, dst Point) int {
+func (g *Grid) CanMoveRock(p Point, d Direction) bool {
+	if d == W && p.X == 0 {
+		return false
+	}
+	if d == E && p.X == g.W-1 {
+		return false
+	}
+	if d == N && p.Y == 0 {
+		return false
+	}
+	if d == S && p.Y == g.H-1 {
+		return false
+	}
+	return true
+}
+
+func (g *Grid) DistanceTo(src, dst Point) int {
 	i := src.Index(g.W)
 	j := dst.Index(g.W)
 	return g.Dist[i][j]
+}
+
+func (g *Grid) NextTo(src, dst Point) Point {
+	i := src.Index(g.W)
+	j := dst.Index(g.W)
+	next := g.Next[i][j]
+	return PointFromIndex(next, g.W)
+}
+
+func (g *Grid) DirectionTo(src, dst Point) Direction {
+	p := g.NextTo(src, dst)
+	return DirectionFromOffset(p.Sub(src))
 }
 
 func (g *Grid) floydWarshall() {

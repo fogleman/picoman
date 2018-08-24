@@ -11,6 +11,22 @@ const (
 
 var Directions = []Direction{N, E, S, W}
 
+func DirectionFromOffset(p Point) Direction {
+	if (p.X == 0 && p.Y == 0) || (p.X != 0 && p.Y != 0) {
+		panic("invalid offset")
+	}
+	if p.X == 0 {
+		if p.Y < 0 {
+			return N
+		}
+		return S
+	}
+	if p.X < 0 {
+		return W
+	}
+	return E
+}
+
 func (d Direction) String() string {
 	switch d {
 	case N:

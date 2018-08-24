@@ -4,8 +4,9 @@ type AgentType int
 
 const (
 	Stationary AgentType = iota
-	Pacing
-	Rotating
+	Rock
+	// Pacing
+	// Rotating
 )
 
 type Agent struct {
@@ -21,6 +22,16 @@ func NewStationaryAgent(p Point, d Direction) *Agent {
 	a.Type = Stationary
 	a.Active = true
 	a.Position = p
+	a.Target = p
 	a.Heading = d
+	return &a
+}
+
+func NewRockAgent(p Point) *Agent {
+	a := Agent{}
+	a.Type = Rock
+	a.Active = true
+	a.Position = p
+	a.Target = p
 	return &a
 }
