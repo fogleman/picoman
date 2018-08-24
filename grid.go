@@ -83,7 +83,8 @@ func (g *Grid) CanMoveRock(p Point, d Direction) bool {
 	if d == S && p.Y == g.H-1 {
 		return false
 	}
-	return true
+	q := p.Add(d.Offset())
+	return g.DistanceTo(p, q) != Inf
 }
 
 func (g *Grid) DistanceTo(src, dst Point) int {

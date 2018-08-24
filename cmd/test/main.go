@@ -68,8 +68,32 @@ func Level6() *Model {
 	return m
 }
 
+func Level7() *Model {
+	g := NewGridFromDescription([]string{
+		"o-o-o-o-o",
+		"|       |",
+		"o-o-o-o-o",
+		"  |   |  ",
+		"o o-o-o o",
+		"    |    ",
+		"o o o o o",
+	})
+
+	m := NewModel(g, Point{2, 3}, Point{2, 0})
+	m.AddAgent(NewRockAgent(Point{1, 2}))
+	m.AddAgent(NewRockAgent(Point{2, 2}))
+	m.AddAgent(NewRockAgent(Point{3, 2}))
+	m.AddAgent(NewStationaryAgent(Point{0, 0}, E))
+	m.AddAgent(NewStationaryAgent(Point{1, 0}, W))
+	m.AddAgent(NewStationaryAgent(Point{3, 0}, W))
+	m.AddAgent(NewStationaryAgent(Point{4, 0}, W))
+	m.AddAgent(NewStationaryAgent(Point{1, 1}, S))
+	m.AddAgent(NewStationaryAgent(Point{3, 1}, S))
+	return m
+}
+
 func main() {
-	m := Level6()
+	m := Level7()
 	fmt.Println(m)
 	Search(m)
 }
