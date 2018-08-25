@@ -3,12 +3,16 @@ package picoman
 func Search(m *Model) []Direction {
 	for n := 0; n <= m.ActiveAgents(); n++ {
 		memo := NewMemo()
-		for i := 1; i < 100; i++ {
+		previousMemoSize := 0
+		for i := 1; ; i++ {
 			path := make([]Direction, i)
 			if search(m, memo, path, 0, i, n) {
-				// fmt.Println(n, memo.Size(), memo.Hits())
 				return path
 			}
+			if memo.Size() == previousMemoSize {
+				break
+			}
+			previousMemoSize = memo.Size()
 		}
 	}
 	return nil
