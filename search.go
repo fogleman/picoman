@@ -1,25 +1,28 @@
 package picoman
 
-import (
-	"fmt"
-)
-
-func Search(m *Model) {
-	memo := NewMemo()
-	for i := 1; ; i++ {
-		path := make([]Direction, i)
-		if search(m, memo, path, 0, i) {
-			fmt.Println(i, memo.Size(), memo.Hits())
-			fmt.Println(path)
-			break
+func Search(m *Model) []Direction {
+	for n := 0; n <= m.ActiveAgents(); n++ {
+		memo := NewMemo()
+		for i := 1; i < 100; i++ {
+			path := make([]Direction, i)
+			if search(m, memo, path, 0, i, n) {
+				// fmt.Println(n, memo.Size(), memo.Hits())
+				return path
+			}
 		}
 	}
+	return nil
 }
 
-func search(m *Model, memo *Memo, path []Direction, depth, maxDepth int) bool {
+func search(m *Model, memo *Memo, path []Direction, depth, maxDepth, maxAgents int) bool {
 	height := maxDepth - depth
+
+	if m.Win() {
+		return m.ActiveAgents() <= maxAgents
+	}
+
 	if height == 0 {
-		return m.Win()
+		return false
 	}
 
 	key := m.ZobristHash()
@@ -33,7 +36,7 @@ func search(m *Model, memo *Memo, path []Direction, depth, maxDepth int) bool {
 		}
 		mc := m.Copy()
 		if mc.DoMove(d) {
-			solved := search(mc, memo, path, depth+1, maxDepth)
+			solved := search(mc, memo, path, depth+1, maxDepth, maxAgents)
 			if solved {
 				memo.Set(key, height-1)
 				path[depth] = d

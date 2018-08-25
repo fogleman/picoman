@@ -1,8 +1,6 @@
 package picoman
 
-import (
-	"strings"
-)
+import "strings"
 
 type Model struct {
 	Grid     *Grid
@@ -37,15 +35,20 @@ func (m *Model) ZobristHash() uint64 {
 }
 
 func (m *Model) Win() bool {
-	if m.Position != m.Target {
-		return false
-	}
+	return m.Position == m.Target
+}
+
+func (m *Model) ActiveAgents() int {
+	activeCount := 0
 	for _, a := range m.Agents {
+		if a.Type == Rock {
+			continue
+		}
 		if a.Active {
-			return false
+			activeCount++
 		}
 	}
-	return true
+	return activeCount
 }
 
 func (m *Model) AddAgent(a *Agent) {
@@ -61,6 +64,7 @@ func (m *Model) CanMove(d Direction) bool {
 
 func (m *Model) DoMove(d Direction) bool {
 	nextRock := false
+	skipMove := make([]bool, len(m.Agents))
 
 	// move player
 	if m.Rock {
@@ -70,7 +74,7 @@ func (m *Model) DoMove(d Direction) bool {
 			if !a.Active {
 				continue
 			}
-			if a.Type == Rock {
+			if a.Fixed {
 				continue
 			}
 			d := p.Sub(a.Position).Abs()
@@ -79,51 +83,79 @@ func (m *Model) DoMove(d Direction) bool {
 				if a.Position != a.Target {
 					a.Heading = m.Grid.DirectionTo(a.Position, a.Target)
 				}
+				skipMove[i] = true
 			}
 		}
 	} else {
 		m.Position = m.Position.Add(d.Offset())
 	}
 
-	// kill agents
-	for i := range m.Agents {
-		a := &m.Agents[i]
-		if !a.Active {
-			continue
+	plant := false
+	for _, a := range m.Agents {
+		if a.Type == Plant && a.Position == m.Position {
+			plant = true
+			break
 		}
-		if a.Position == m.Position {
-			a.Active = false
-			if a.Type == Rock {
-				nextRock = true
+	}
+
+	if !plant {
+		// kill agents
+		for i := range m.Agents {
+			a := &m.Agents[i]
+			if !a.Active {
+				continue
+			}
+			if a.Position == m.Position {
+				a.Active = false
+				if a.Type == Rock {
+					nextRock = true
+				}
+			}
+		}
+
+		// kill player
+		for _, a := range m.Agents {
+			if !a.Active {
+				continue
+			}
+			if !m.Grid.CanMove(a.Position, a.Heading) {
+				continue
+			}
+			p := a.Position.Add(a.Heading.Offset())
+			if p == m.Position {
+				return false
 			}
 		}
 	}
 
-	// kill player
-	for _, a := range m.Agents {
-		if !a.Active {
-			continue
-		}
-		if !m.Grid.CanMove(a.Position, a.Heading) {
-			continue
-		}
-		p := a.Position.Add(a.Heading.Offset())
-		if p == m.Position {
-			return false
-		}
-	}
-
 	// move agents
-	for i := range m.Agents {
-		a := &m.Agents[i]
-		if !a.Active {
-			continue
-		}
-		if a.Position != a.Target {
-			a.Heading = m.Grid.DirectionTo(a.Position, a.Target)
-			a.Position = m.Grid.NextTo(a.Position, a.Target)
+	if !nextRock {
+		for i := range m.Agents {
+			a := &m.Agents[i]
+			if !a.Active {
+				continue
+			}
+			if a.Fixed {
+				continue
+			}
+			if skipMove[i] {
+				continue
+			}
 			if a.Position != a.Target {
 				a.Heading = m.Grid.DirectionTo(a.Position, a.Target)
+				a.Position = m.Grid.NextTo(a.Position, a.Target)
+				if a.Position != a.Target {
+					a.Heading = m.Grid.DirectionTo(a.Position, a.Target)
+				}
+			} else if a.Type == Pacing {
+				if !m.Grid.CanMove(a.Position, a.Heading) {
+					a.Heading = a.Heading.Opposite()
+				}
+				a.Position = a.Position.Add(a.Heading.Offset())
+				if !m.Grid.CanMove(a.Position, a.Heading) {
+					a.Heading = a.Heading.Opposite()
+				}
+				a.Target = a.Position
 			}
 		}
 	}
@@ -171,7 +203,12 @@ func (m *Model) String() string {
 		p := a.Position
 		if a.Type == Rock {
 			cells[p.Y*2][p.X*2] = "R"
-			continue
+		}
+		if a.Type == Waypoint {
+			cells[p.Y*2][p.X*2] = "W"
+		}
+		if a.Type == Plant {
+			cells[p.Y*2][p.X*2] = "P"
 		}
 		switch a.Heading {
 		case N:
