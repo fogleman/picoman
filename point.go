@@ -32,8 +32,3 @@ func (a Point) Add(b Point) Point {
 func (a Point) Sub(b Point) Point {
 	return Point{a.X - b.X, a.Y - b.Y}
 }
-
-// func (a Point) ManhattanDistance(b Point) Point {
-// 	p := a.Sub(b).Abs()
-// 	return p.X + p.Y
-// }
