@@ -282,12 +282,13 @@ func main() {
 		// fmt.Println()
 
 		moves := Search(m)
-		fmt.Println(len(moves), moves)
-		// fmt.Println()
 
-		// for _, move := range moves {
-		// 	m.DoMove(move)
-		// }
+		for _, move := range moves {
+			m.DoMove(move)
+		}
+
+		fmt.Println(m.ActiveAgents(), len(moves), moves)
+		// fmt.Println()
 
 		// fmt.Println(m)
 		// fmt.Println()
